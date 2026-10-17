@@ -1,5 +1,5 @@
 # =====================================================================
-#  VideoDownloader.ps1 - yt-dlp front end for Windows (v2, tabbed)
+#  VideoDownloader.ps1 - yt-dlp front end for Windows (v0.0.2, tabbed)
 #  Paste links, choose a name style and folder, press Download.
 #  Output is Premiere Pro friendly (H.264 video + AAC audio, MP4).
 #  Queue tab: frame-accurate clips with Premiere timecode HH:MM:SS:FF.
@@ -209,7 +209,7 @@ public class PreviewFetcher
 # ---------------------------------------------------------------------
 #  Constants and shared state
 # ---------------------------------------------------------------------
-$AppVersion = '2.0 (tabs)'
+$AppVersion = '0.0.2'
 $ScriptPath = $PSCommandPath
 $AppDir     = Split-Path -Parent $ScriptPath
 $ToolsHome  = Join-Path $AppDir 'tools'
