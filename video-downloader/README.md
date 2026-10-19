@@ -1,4 +1,4 @@
-# Video Downloader
+# videoprep Video Downloader
 
 *[English version](README.en.md)*
 
