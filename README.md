@@ -43,11 +43,6 @@ El resultado debe ser igual al de la página del release. Si no coincide, no lo 
 
 Abrí la pestaña **Log**, apretá **Test setup** y después **Copy log**. Si abrís un [issue](https://github.com/nicolasrabe/videoprep/issues/new/choose), pegá ese texto (revisá antes que no tenga datos personales).
 
-## Apoyar el proyecto
-
-videoprep es y va a seguir siendo gratis. Si te sirve y querés ayudar a mantenerlo, podés hacer una donación:
-
-- *(completar con tus links: GitHub Sponsors, Ko-fi, Cafecito, etc.)*
 
 ## Aviso legal
 
