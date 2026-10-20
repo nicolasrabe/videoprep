@@ -8,12 +8,13 @@
 
 ## Qué hace
 
-- Pegás links (completos, acortados `youtu.be`, Shorts o solo el código del video). Reconoce el link automáticamente.
-- Vista previa con miniatura, título, canal, duración y la calidad que se va a descargar.
-- Nombres de archivo: **prefijo + 1, 2, 3...** (por ejemplo `Clip1.mp4`) o el **título original**.
-- Pestaña **Queue**: cortá un clip con **timecode de Premiere `HH:MM:SS:FF`**, exacto al frame (por ejemplo, los últimos 15 frames de un video).
-- Solo audio (M4A, MP3, WAV), tope de resolución, subtítulos, miniaturas, límite de velocidad.
-- Reintentar los que fallaron, reordenar y quitar links.
+- Pegás un enlace (completo, corto `youtu.be`, Shorts o solo el ID del video): se reconoce solo, sin apretar Enter, y aparece la vista previa con miniatura, título, canal, duración y la calidad que se va a descargar.
+- Elegís **video o solo audio** y el formato: **MP4**, **MOV** (H.264 o **ProRes 422 HQ**), **WebM**, **MKV**, y audio en **M4A, MP3, WAV, FLAC u Opus**.
+- **Varios fragmentos del mismo video** con **código de tiempo de Premiere `HH:MM:SS:FF`**, exactos al fotograma (por ejemplo, los últimos 15 fotogramas de un video). El video se baja una sola vez.
+- Nombres de archivo: **título original**, **título personalizado** o **serie** (nombre + número).
+- **Cola** con reordenar, editar, quitar y reintentar los fallidos. Si pegás otro enlace, el anterior pasa solo a la cola.
+- Ventana de **Opciones** (subtítulos, miniaturas, límite de velocidad, calidad de los fragmentos, omitir videos ya descargados).
+- Interfaz en **español e inglés** y temas **claro, oscuro, beige, gris, azul grisáceo o un color a elección**.
 
 ## Instalación
 
@@ -42,6 +43,11 @@ El resultado debe ser igual al de la página del release. Si no coincide, no lo 
 
 Abrí la pestaña **Log**, apretá **Test setup** y después **Copy log**. Si abrís un [issue](https://github.com/nicolasrabe/videoprep/issues/new/choose), pegá ese texto (revisá antes que no tenga datos personales).
 
+## Apoyar el proyecto
+
+videoprep es y va a seguir siendo gratis. Si te sirve y querés ayudar a mantenerlo, podés hacer una donación:
+
+- *(completar con tus links: GitHub Sponsors, Ko-fi, Cafecito, etc.)*
 
 ## Aviso legal
 

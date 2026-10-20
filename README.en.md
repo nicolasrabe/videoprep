@@ -8,12 +8,13 @@
 
 ## Features
 
-- Paste links (full, short `youtu.be`, Shorts or just the video ID); each one is recognized instantly.
-- Preview with thumbnail, title, channel, length and the quality that will be downloaded.
-- File names: **prefix + 1, 2, 3...** (for example `Clip1.mp4`) or the **original title**.
-- **Queue** tab: cut a clip with **Premiere timecode `HH:MM:SS:FF`**, frame-accurate (for example, the last 15 frames of a video).
-- Audio-only (M4A, MP3, WAV), resolution cap, subtitles, thumbnails, speed limit.
-- Retry failed items, reorder and remove links.
+- Paste a link (full, short `youtu.be`, Shorts or just the video ID): it is recognized instantly, no Enter needed, and a preview shows the thumbnail, title, channel, length and the quality that will be downloaded.
+- Choose **video or audio only** and the format: **MP4**, **MOV** (H.264 or **ProRes 422 HQ**), **WebM**, **MKV**, and audio as **M4A, MP3, WAV, FLAC or Opus**.
+- **Several clips from the same video** with **Premiere timecode `HH:MM:SS:FF`**, frame-accurate (for example, the last 15 frames of a video). The video is downloaded only once.
+- File names: **original title**, **custom title** or **series** (name + number).
+- **Queue** with reorder, edit, remove and retry failed. Pasting another link sends the previous one to the queue automatically.
+- **Options** window (subtitles, thumbnails, speed limit, clip quality, skip already-downloaded videos).
+- **Spanish and English** interface and themes: **light, dark, beige, gray, slate blue or a custom color**.
 
 ## Install
 
@@ -41,6 +42,12 @@ It must match the value on the release page. If it does not, do not use the file
 ## Troubleshooting
 
 Open the **Log** tab, press **Test setup**, then **Copy log**. If you open an [issue](https://github.com/nicolasrabe/videoprep/issues/new/choose), paste that text (check it for personal data first).
+
+## Support the project
+
+videoprep is free and will stay free. If it helps you and you want to support its upkeep, you can donate:
+
+- *(add your links: GitHub Sponsors, Ko-fi, etc.)*
 
 ## Legal notice
 

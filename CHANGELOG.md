@@ -2,6 +2,17 @@
 
 Versions below 1.0.0 are early releases: things can change between them.
 
+## 0.1.0
+- New Download tab: single-line link box (clears after pasting), format block, clips, file names, Options window and Send to queue.
+- Several clips per video (frame-accurate Premiere timecode); the video is downloaded once and cut as many times as needed.
+- New formats: MP4, MOV (H.264 or ProRes 422 HQ), WebM, MKV; audio-only as M4A, MP3, WAV, FLAC or Opus.
+- Pasting a new link sends the previous one to the queue automatically.
+- Queue tab: edit, remove, reorder, retry failed, load a .txt file.
+- Full Spanish and English interface; language selector in Settings.
+- Themes: light, dark, beige, gray, slate blue and a custom color.
+- The Options tab became a window; Download, Stop, Open folder and Browse were rearranged and colored.
+- The script is now saved as UTF-8 with BOM so accents display correctly.
+
 ## 0.0.3
 - The project is now called **videoprep** (it was "Video Downloader"): new file names (`videoprep.bat`, `videoprep.ps1`), window title and documentation.
 - Settings and the "already downloaded" history from older versions are copied over automatically.
