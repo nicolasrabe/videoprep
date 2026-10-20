@@ -45,10 +45,6 @@ Open the **Log** tab, press **Test setup**, then **Copy log**. If you open an [i
 
 ## Support the project
 
-videoprep is free and will stay free. If it helps you and you want to support its upkeep, you can donate:
-
-- *(add your links: GitHub Sponsors, Ko-fi, etc.)*
-
 ## Legal notice
 
 This tool is for downloading content you **own, have a license for, or have permission to use**. Following each site's terms and copyright law is each person's responsibility. This project is **not affiliated with or endorsed by YouTube or Google**.
