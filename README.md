@@ -49,7 +49,7 @@ Abrí la pestaña **Log**, apretá **Test setup** y después **Copy log**. Si ab
 videoprep es y va a seguir siendo gratis. Si te sirve y querés ayudar a mantenerlo, podés hacer una donación:
 
 * https://www.paypal.com/donate/?hosted_button_id=FFYRACETDE6XQ
-* link.mercadopago.com.ar/rabe5bk
+* https://link.mercadopago.com.ar/rabe5bk
 
 ## Aviso legal
 
