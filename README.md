@@ -9,6 +9,7 @@
 ## Qué hace
 
 - Pegás un enlace (completo, corto `youtu.be`, Shorts o solo el ID del video): se reconoce solo, sin apretar Enter, y aparece la vista previa con miniatura, título, canal, duración y la calidad que se va a descargar.
+- También acepta enlaces de **Twitch (clips y videos), Kick, X/Twitter, Facebook, Instagram, TikTok, Vimeo** y otros sitios que yt-dlp soporte. Algunos contenidos (privados o que piden iniciar sesión) necesitan que tengas la sesión abierta en tu navegador.
 - Elegís **video o solo audio** y el formato: **MP4**, **MOV** (H.264 o **ProRes 422 HQ**), **WebM**, **MKV**, y audio en **M4A, MP3, WAV, FLAC u Opus**.
 - **Varios fragmentos del mismo video** con **código de tiempo de Premiere `HH:MM:SS:FF`**, exactos al fotograma (por ejemplo, los últimos 15 fotogramas de un video). El video se baja una sola vez.
 - Nombres de archivo: **título original**, **título personalizado** o **serie** (nombre + número).
@@ -43,10 +44,15 @@ El resultado debe ser igual al de la página del release. Si no coincide, no lo 
 
 Abrí la pestaña **Log**, apretá **Test setup** y después **Copy log**. Si abrís un [issue](https://github.com/nicolasrabe/videoprep/issues/new/choose), pegá ese texto (revisá antes que no tenga datos personales).
 
+## Apoyar el proyecto
+
+videoprep es y va a seguir siendo gratis. Si te sirve y querés ayudar a mantenerlo, podés hacer una donación:
+
+- *(completar con tus links: GitHub Sponsors, Ko-fi, Cafecito, etc.)*
 
 ## Aviso legal
 
-Esta herramienta es para descargar contenido **propio, con licencia o con permiso de su autor**. Cumplir los términos de cada sitio y las leyes de derechos de autor es responsabilidad de cada persona. Este proyecto **no está afiliado ni respaldado por YouTube ni Google**.
+Esta herramienta es para descargar contenido **propio, con licencia o con permiso de su autor**. Cumplir los términos de cada sitio y las leyes de derechos de autor es responsabilidad de cada persona. Este proyecto **no está afiliado ni respaldado por YouTube, Google, Twitch, Kick, X, Meta (Facebook e Instagram), TikTok ni ninguna otra plataforma mencionada**.
 
 ## Licencia y créditos
 

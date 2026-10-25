@@ -9,6 +9,7 @@
 ## Features
 
 - Paste a link (full, short `youtu.be`, Shorts or just the video ID): it is recognized instantly, no Enter needed, and a preview shows the thumbnail, title, channel, length and the quality that will be downloaded.
+- It also accepts links from **Twitch (clips and videos), Kick, X/Twitter, Facebook, Instagram, TikTok, Vimeo** and other sites supported by yt-dlp. Private content or content that asks you to log in needs you to be logged in to that site in your browser.
 - Choose **video or audio only** and the format: **MP4**, **MOV** (H.264 or **ProRes 422 HQ**), **WebM**, **MKV**, and audio as **M4A, MP3, WAV, FLAC or Opus**.
 - **Several clips from the same video** with **Premiere timecode `HH:MM:SS:FF`**, frame-accurate (for example, the last 15 frames of a video). The video is downloaded only once.
 - File names: **original title**, **custom title** or **series** (name + number).
@@ -45,9 +46,13 @@ Open the **Log** tab, press **Test setup**, then **Copy log**. If you open an [i
 
 ## Support the project
 
+videoprep is free and will stay free. If it helps you and you want to support its upkeep, you can donate:
+
+- *(add your links: GitHub Sponsors, Ko-fi, etc.)*
+
 ## Legal notice
 
-This tool is for downloading content you **own, have a license for, or have permission to use**. Following each site's terms and copyright law is each person's responsibility. This project is **not affiliated with or endorsed by YouTube or Google**.
+This tool is for downloading content you **own, have a license for, or have permission to use**. Following each site's terms and copyright law is each person's responsibility. This project is **not affiliated with or endorsed by YouTube, Google, Twitch, Kick, X, Meta (Facebook and Instagram), TikTok or any other platform mentioned**.
 
 ## License and credits
 

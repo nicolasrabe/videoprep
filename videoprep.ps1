@@ -1,5 +1,5 @@
 ﻿# =====================================================================
-#  videoprep.ps1 - prepare videos for editing (v0.1.0)
+#  videoprep.ps1 - prepare videos for editing (v0.1.1)
 #  Paste a link, pick format, clips and names, send to the queue, download.
 #  Output is edit-friendly: MP4/MOV (H.264 or ProRes), WebM, MKV, audio.
 #  Clips use Premiere timecode HH:MM:SS:FF. Saved as UTF-8 with BOM.
@@ -223,6 +223,26 @@ public class PreviewFetcher
             Results.Enqueue(it);
         });
     }
+
+    public void FetchThumb(string id, string url)
+    {
+        ThreadPool.QueueUserWorkItem(delegate(object state)
+        {
+            PreviewItem it = new PreviewItem();
+            it.Id = id;
+            try { ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072 | ServicePointManager.SecurityProtocol; } catch { }
+            try
+            {
+                using (WebClient wc = new WebClient())
+                {
+                    wc.Headers[HttpRequestHeader.UserAgent] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64)";
+                    it.Thumb = wc.DownloadData(url);
+                }
+            }
+            catch { }
+            Results.Enqueue(it);
+        });
+    }
 }
 '@
 
@@ -231,7 +251,7 @@ public class PreviewFetcher
 # ---------------------------------------------------------------------
 #  Constants and shared state
 # ---------------------------------------------------------------------
-$AppVersion = '0.1.0'
+$AppVersion = '0.1.1'
 $ScriptPath = $PSCommandPath
 $AppDir     = Split-Path -Parent $ScriptPath
 $ToolsHome  = Join-Path $AppDir 'tools'
@@ -306,6 +326,7 @@ $FormatKeys = @{ video = @('mp4', 'movh', 'movp', 'webm', 'mkv'); audio = @('m4a
 $FormatLabels = @{ mp4 = 'MP4 - H.264 + AAC'; movh = 'MOV - H.264 + AAC'; movp = 'MOV - ProRes 422 HQ'; webm = 'WebM - VP9 + Opus'; mkv = 'MKV'; m4a = 'M4A (AAC)'; mp3 = 'MP3'; wav = 'WAV'; flac = 'FLAC'; opus = 'Opus' }
 $FormatExt = @{ mp4 = '.mp4'; movh = '.mov'; movp = '.mov'; webm = '.webm'; mkv = '.mkv'; m4a = '.m4a'; mp3 = '.mp3'; wav = '.wav'; flac = '.flac'; opus = '.opus' }
 $ResMap = @{ '4K' = 2160; '1440p' = 1440; '1080p' = 1080; '720p' = 720; '480p' = 480 }
+$KnownHosts = '^(?:www\.|m\.|mobile\.|clips\.|go\.)?(?:twitch\.tv|kick\.com|x\.com|twitter\.com|facebook\.com|fb\.watch|instagram\.com|tiktok\.com|vimeo\.com|reddit\.com|dailymotion\.com)/'
 $ThemeNames = @('light', 'dark', 'beige', 'gray', 'slate', 'custom')
 
 $ThemeHex = @{
@@ -327,7 +348,7 @@ $I18N['es'] = @{
     lbl_clips = 'Fragmentos (vacío = video completo)'; btn_addclip = 'Agregar fragmento'; lbl_start = 'Inicio'; lbl_end = 'Fin'
     prev_hint = 'Pegá un enlace de YouTube para ver la vista previa'
     prev_loading = 'Cargando vista previa...'; prev_none = 'Sin vista previa para este enlace'
-    prev_none2 = 'Puede ser un video privado o eliminado, o el ID es incorrecto.'
+    prev_none2 = 'Puede ser privado o eliminado, pedir iniciar sesión, o no estar soportado.'
     prev_check = 'Revisando la calidad disponible...'; prev_noformat = 'No hay versión H.264 (activá la conversión en Opciones).'
     prev_fail = 'No se pudo revisar la calidad.'; prev_audio = 'Se descargará: audio {0}'; prev_will = 'Se descargará: {0}'; prev_conv = ' (se convertirá)'
     lbl_names = 'Nombre de los archivos'; rad_n1 = 'Título original del video'; rad_n2 = 'Título personalizado'; rad_n3 = 'Serie (nombre + número)'
@@ -419,7 +440,7 @@ $I18N['en'] = @{
     lbl_clips = 'Clips (empty = whole video)'; btn_addclip = 'Add clip'; lbl_start = 'Start'; lbl_end = 'End'
     prev_hint = 'Paste a YouTube link to see a preview'
     prev_loading = 'Loading preview...'; prev_none = 'No preview for this link'
-    prev_none2 = 'The video may be private or removed, or the ID is wrong.'
+    prev_none2 = 'It may be private or removed, need a login, or not be supported.'
     prev_check = 'Checking available quality...'; prev_noformat = 'No H.264 version offered (turn on the conversion in Options).'
     prev_fail = 'Quality check unavailable.'; prev_audio = 'Will download: {0} audio'; prev_will = 'Will download: {0}'; prev_conv = ' (will be converted)'
     lbl_names = 'File names'; rad_n1 = 'Original video title'; rad_n2 = 'Custom title'; rad_n3 = 'Series (name + number)'
@@ -667,6 +688,8 @@ function Get-DownloadArgs($job) {
         'webm' { return @('-f', 'bv*[ext=webm]+ba[ext=webm]/bv*+ba/b', '-S', $sort, '--merge-output-format', 'webm/mkv') }
         'mkv'  { return @('-f', 'bv*+ba/b', '-S', $sort, '--merge-output-format', 'mkv') }
     }
+    # other sites: best available, converted afterwards if needed
+    if ($job.Site -eq 'other') { return @('-f', 'bv*+ba/b', '-S', $sort, '--merge-output-format', 'mp4/mkv') }
     # mp4 and MOV (H.264): strict H.264 + AAC, optional fallback to the best stream
     $fmt = $FmtSafe
     if ($Opt.Fallback) { $fmt = $FmtSafe + '/bv*+ba/b' }
@@ -870,7 +893,25 @@ function ConvertTo-YoutubeUrl([string]$text) {
 }
 
 function Get-VideoId([string]$url) {
-    if ($url -match '[?&]v=([A-Za-z0-9_-]{11})') { return $Matches[1] }
+    if ($url -notmatch '^https://www\.youtube\.com/watch\?v=') { return $null }
+    if ($url -match '[?&]v=([A-Za-z0-9_-]{11})$') { return $Matches[1] }
+    return $null
+}
+
+# Key used for the preview cache: the YouTube ID, or a short hash for other sites
+function Get-LinkKey([string]$url) {
+    $id = Get-VideoId $url
+    if ($id) { return $id }
+    $sha = [System.Security.Cryptography.SHA1]::Create()
+    $bytes = $sha.ComputeHash([System.Text.Encoding]::UTF8.GetBytes($url))
+    return ('h' + (($bytes | ForEach-Object { $_.ToString('x2') }) -join '').Substring(0, 12))
+}
+
+function ConvertTo-AnyUrl([string]$tok) {
+    $u = ConvertTo-YoutubeUrl $tok
+    if ($u) { return $u }
+    if ($tok -match '^https?://') { return $tok }
+    if ($tok -match $KnownHosts) { return ('https://' + $tok) }
     return $null
 }
 
@@ -1073,11 +1114,13 @@ function Start-DetailRun([string]$id) {
     Start-DetailAttempt
 }
 
-function Ensure-Meta([string]$id) {
+function Ensure-Meta([string]$id, [string]$url = '') {
     if (-not $P.Cache.ContainsKey($id)) {
-        $P.Cache[$id] = @{ Fetched = $false; Title = ''; Author = ''; Img = $null; Stream = $null; Duration = ''; Date = ''; DetState = ''; DetText = '' }
-        $P.Fetcher.Fetch($id)
+        $other = ($id.Length -ne 11)
+        $P.Cache[$id] = @{ Fetched = $false; Title = ''; Author = ''; Img = $null; Stream = $null; Duration = ''; Date = ''; DetState = ''; DetText = ''; Other = $other; Url = $url }
+        if (-not $other) { $P.Fetcher.Fetch($id) }
     }
+    elseif ($url -and (-not $P.Cache[$id].Url)) { $P.Cache[$id].Url = $url }
 }
 
 function Invoke-PreviewTick {
@@ -1106,10 +1149,9 @@ function Invoke-PreviewTick {
 }
 
 function Request-Preview([string]$url) {
-    $id = Get-VideoId $url
-    if (-not $id) { return }
+    $id = Get-LinkKey $url
     $P.Id = $id
-    Ensure-Meta $id
+    Ensure-Meta $id $url
     Show-Preview $id
     Ensure-Details $id
 }
@@ -1214,7 +1256,7 @@ function Start-Attempt {
     if ($Opt.Archive) { $ytArgs += @('--download-archive', $ArchiveFile) }
 
     $ytArgs += @('-P', $S.Folder)
-    if ($job.Label) { $nameT = $job.Label } else { $nameT = '%(title).140s' }
+    if ($job.Label) { $nameT = $job.Label } else { $nameT = '%(title,id).140s' }
     if ($g.HasClips) { $nameT = $nameT + '__full' }
     $ytArgs += @('-o', ($nameT + '.%(ext)s'))
 
@@ -1321,7 +1363,7 @@ function Complete-Download($job, $file) {
     $ext = Get-ExtFor $job.Fmt
     if (-not $needPost) {
         if ($job.Fmt -eq 'movp') { $needPost = $true }
-        elseif ($job.Kind -eq 'video' -and ($job.Fmt -eq 'mp4' -or $job.Fmt -eq 'movh') -and $Opt.Fallback -and $T.Ffprobe) {
+        elseif ($job.Kind -eq 'video' -and ($job.Fmt -eq 'mp4' -or $job.Fmt -eq 'movh') -and ($Opt.Fallback -or $job.Site -eq 'other') -and $T.Ffprobe) {
             $tm0 = Get-SourceTiming $file.FullName
             if ($tm0.Ok -and ($tm0.VCodec -ne 'h264' -or $tm0.ACodec -ne 'aac' -or $file.Extension -ne $ext)) { $needPost = $true }
         }
@@ -1544,6 +1586,9 @@ function Finish-Attempt([int]$exitCode) {
         if ($all -match 'Sign in to confirm') {
             Write-Log '    Hint: log into YouTube in Firefox, keep the login source on Automatic (Settings tab), then press Update tools and try again.'
         }
+        elseif (($job.Site -eq 'other') -and ($all -match '(?i)login|log in|cookie|private|authenticat|restricted|rate.?limit|not available')) {
+            Write-Log '    Hint: this site may need you to be logged in. Log in to it in Firefox and keep the login source on Automatic (Settings tab). Public posts usually work without it. Press Update tools if the site changed.'
+        }
         elseif ($all -match 'Requested format is not available') {
             Write-Log '    Hint: YouTube did not offer this format. Turn on the H.264 conversion in Options, or press Update tools.'
         }
@@ -1657,7 +1702,7 @@ function Start-Batch {
                 Key = $key; Gid = $it.Id; Idx = $i; Count = $total; Url = $it.Url
                 Kind = $it.Kind; Fmt = $it.Fmt; Cap = $it.Cap; Label = $label
                 Start = [string]$outs[$i].Start; End = [string]$outs[$i].End
-                Download = ($i -eq 0); Status = 'Queued'; Fps = $it.Fps
+                Download = ($i -eq 0); Status = 'Queued'; Fps = $it.Fps; Site = $it.Site
             }
         }
     }
@@ -1780,10 +1825,17 @@ function Get-WillText($c) {
     $fmt = Get-SelFmt
     if ((Get-FormatKind $fmt) -eq 'audio') { return ((Tx 'prev_audio') -f $FormatLabels[$fmt]) }
     $will = ''
-    if ($fmt -eq 'movp') { $will = ('ProRes 422 HQ ({0})' -f $c.DetRes) }
-    else { $will = (('{0} {1} + {2}' -f $c.DetRes, $c.DetVL, $c.DetAL)).Trim() }
+    if ($fmt -eq 'movp') {
+        $will = 'ProRes 422 HQ'
+        if ($c.DetRes) { $will = $will + ' (' + $c.DetRes + ')' }
+    } else {
+        $bits = @()
+        foreach ($x in @($c.DetRes, $c.DetVL)) { if ($x) { $bits += $x } }
+        $will = ($bits -join ' ')
+        if ($c.DetAL) { $will = $will + ' + ' + $c.DetAL }
+    }
     if (($fmt -eq 'mp4' -or $fmt -eq 'movh') -and $c.DetVL -ne 'H.264') { $will = $will + (Tx 'prev_conv') }
-    return ((Tx 'prev_will') -f $will)
+    return ((Tx 'prev_will') -f $will.Trim())
 }
 
 function Show-Preview([string]$id) {
@@ -1817,14 +1869,21 @@ function Show-Preview([string]$id) {
 
 function Start-DetailAttempt {
     $id = $P.RunnerId
+    $c = $P.Cache[$id]
     $browser = $P.Browsers[$P.BIdx]
     $fmt = Get-SelFmt
     $sort = ('res:{0},fps' -f (Get-SelCap))
-    if ($fmt -eq 'mp4' -or $fmt -eq 'movh' -or (Get-FormatKind $fmt) -eq 'audio') { $sel = $FmtSafe } else { $sel = 'bv*+ba/b' }
+    if ($c.Other) {
+        $sel = 'bv*+ba/b'
+        $url = $c.Url
+    } else {
+        $url = 'https://www.youtube.com/watch?v=' + $id
+        if ($fmt -eq 'mp4' -or $fmt -eq 'movh' -or (Get-FormatKind $fmt) -eq 'audio') { $sel = $FmtSafe } else { $sel = 'bv*+ba/b' }
+    }
     $a = @('--ignore-config', '--no-playlist', '--no-warnings', '-f', $sel, '-S', $sort,
-        '--print', 'DET|%(duration_string)s|%(height)s|%(fps)s|%(vcodec)s|%(acodec)s|%(upload_date)s')
+        '--print', 'DET|%(duration_string)s|%(height)s|%(fps)s|%(vcodec)s|%(acodec)s|%(upload_date)s|%(uploader)s|%(thumbnail)s|%(title)s')
     $a += Get-CookieArgs $browser
-    $a += ('https://www.youtube.com/watch?v=' + $id)
+    $a += $url
     $P.DetOut = New-Object System.Text.StringBuilder
     $P.DetLine = $null
     $P.RunnerStart = Get-Date
@@ -1840,7 +1899,7 @@ function Start-DetailAttempt {
 function Ensure-Details([string]$id) {
     $c = $P.Cache[$id]
     if ($null -eq $c) { return }
-    if (-not $c.Title) { return }
+    if ((-not $c.Title) -and (-not $c.Other)) { return }
     if ($c.DetState -ne '') { return }
     if ($S.Mode -ne 'idle') { return }
     Start-DetailRun $id
@@ -1863,7 +1922,7 @@ function Finish-Detail([int]$exitCode) {
     if ($null -eq $c) { return }
     $out = $P.DetOut.ToString()
     if ($P.DetLine) {
-        $f = @($P.DetLine -split '\|')
+        $f = @($P.DetLine -split '\|', 10)
         $dur = ''
         if ($f.Count -gt 1 -and $f[1] -and $f[1] -ne 'NA') { $dur = $f[1] }
         $h = ''
@@ -1876,6 +1935,12 @@ function Finish-Detail([int]$exitCode) {
         if ($f.Count -gt 5) { $ac = $f[5] }
         $dt = ''
         if ($f.Count -gt 6) { $dt = $f[6] }
+        $up = ''
+        if ($f.Count -gt 7) { $up = $f[7] }
+        $th = ''
+        if ($f.Count -gt 8) { $th = $f[8] }
+        $ti = ''
+        if ($f.Count -gt 9) { $ti = $f[9] }
         $res = ''
         if ($h -match '^\d+$') {
             $res = $h + 'p'
@@ -1885,18 +1950,26 @@ function Finish-Detail([int]$exitCode) {
             }
         }
         $vl = $vc
-        if ($vc -like 'avc1*') { $vl = 'H.264' }
+        if ($vc -like 'avc1*' -or $vc -eq 'h264') { $vl = 'H.264' }
         elseif ($vc -like 'vp0*' -or $vc -like 'vp9*') { $vl = 'VP9' }
         elseif ($vc -like 'av01*') { $vl = 'AV1' }
         $al = $ac
-        if ($ac -like 'mp4a*') { $al = 'AAC' }
+        if ($ac -like 'mp4a*' -or $ac -eq 'aac') { $al = 'AAC' }
         elseif ($ac -like 'opus*') { $al = 'Opus' }
+        if ($vl -eq 'NA' -or $vl -eq 'none') { $vl = '' }
+        if ($al -eq 'NA' -or $al -eq 'none') { $al = '' }
         $c.Duration = $dur
         if ($dt -match '^(\d{4})(\d{2})(\d{2})$') { $c.Date = ('{0}-{1}-{2}' -f $Matches[1], $Matches[2], $Matches[3]) }
         $c.DetRes = $res
         $c.DetVL = $vl
         $c.DetAL = $al
         $c.DetState = 'done'
+        if ($c.Other) {
+            $c.Fetched = $true
+            if ($ti -and $ti -ne 'NA') { $c.Title = $ti }
+            if ($up -and $up -ne 'NA') { $c.Author = $up }
+            if ($th -match '^https?://') { $P.Fetcher.FetchThumb($id, $th) }
+        }
         if ($P.BIdx -gt 0) { $Pref.Browser = $P.Browsers[$P.BIdx] }
     }
     elseif ($exitCode -ne 0 -and ($P.BIdx + 1) -lt $P.Browsers.Count -and $out -match $RetryRegex) {
@@ -1904,8 +1977,11 @@ function Finish-Detail([int]$exitCode) {
         Start-DetailAttempt
         return
     }
-    elseif ($out -match 'Requested format is not available') { $c.DetState = 'noformat' }
-    else { $c.DetState = 'fail' }
+    elseif (($out -match 'Requested format is not available') -and (-not $c.Other)) { $c.DetState = 'noformat' }
+    else {
+        $c.DetState = 'fail'
+        if ($c.Other) { $c.Fetched = $true }
+    }
     if ($P.Id -eq $id) { Show-Preview $id }
 }
 
@@ -2053,11 +2129,13 @@ function Get-DefaultNaming {
 }
 
 function New-Item-Object([string]$url, [string]$kind, [string]$fmt, [int]$cap, [string]$mode, [string]$custom, [string]$prefix, $clips) {
-    $vid = Get-VideoId $url
+    $vid = Get-LinkKey $url
+    $site = 'other'
+    if ($vid.Length -eq 11) { $site = 'youtube' }
     $fps = 30.0
-    if ($vid -and $P.Cache.ContainsKey($vid) -and $P.Cache[$vid].Fps) { $fps = [double]$P.Cache[$vid].Fps }
+    if ($P.Cache.ContainsKey($vid) -and $P.Cache[$vid].Fps) { $fps = [double]$P.Cache[$vid].Fps }
     return [pscustomobject]@{
-        Id = 0; Url = $url; VideoId = $vid; Kind = $kind; Fmt = $fmt; Cap = $cap
+        Id = 0; Url = $url; VideoId = $vid; Site = $site; Kind = $kind; Fmt = $fmt; Cap = $cap
         NameMode = $mode; Custom = $custom; Prefix = $prefix; Clips = @($clips); Fps = $fps
     }
 }
@@ -2066,7 +2144,7 @@ function Add-ItemToQueue($it) {
     $Counter.Item = $Counter.Item + 1
     $it.Id = $Counter.Item
     [void]$Items.Add($it)
-    if ($it.VideoId) { Ensure-Meta $it.VideoId }
+    if ($it.VideoId) { Ensure-Meta $it.VideoId $it.Url }
 }
 
 function Add-DefaultItem([string]$url) {
@@ -2111,7 +2189,7 @@ function Send-Draft([bool]$interactive) {
     } else {
         Add-ItemToQueue $it
     }
-    if ($it.VideoId) { Ensure-Meta $it.VideoId }
+    if ($it.VideoId) { Ensure-Meta $it.VideoId $it.Url }
 
     $Draft.Url = ''
     $Draft.Id = ''
@@ -2129,7 +2207,7 @@ function Accept-Link([string]$url) {
     if ($Draft.Url) { if (-not (Send-Draft $false)) { return } }
     $txtLink.Clear()
     $Draft.Url = $url
-    $Draft.Id = Get-VideoId $url
+    $Draft.Id = Get-LinkKey $url
     $Draft.EditId = 0
     Request-Preview $url
 }
@@ -2137,9 +2215,8 @@ function Accept-Link([string]$url) {
 function Get-LinksFromText([string]$text) {
     $urls = @()
     foreach ($tok in @($text -split '\s+' | Where-Object { $_ -ne '' })) {
-        $u = ConvertTo-YoutubeUrl $tok
+        $u = ConvertTo-AnyUrl $tok
         if ($u) { $urls += $u }
-        elseif ($tok -match '^https?://') { $urls += $tok }
     }
     return ,$urls
 }

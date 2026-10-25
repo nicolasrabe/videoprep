@@ -2,6 +2,14 @@
 
 Versions below 1.0.0 are early releases: things can change between them.
 
+## 0.1.1
+- Links from other sites: Twitch (clips and videos), Kick, X/Twitter, Facebook, Instagram, TikTok, Vimeo and any other site supported by yt-dlp.
+- Preview for those sites (title, author, length, thumbnail and quality) read through yt-dlp.
+- Other sites are downloaded as best available and converted to the chosen format when needed.
+- File names fall back to the video ID when a site gives no title.
+- Hints for sites that need a login; the legal notice now covers the other platforms.
+- Safer link recognition: only real YouTube links are treated as YouTube (Facebook video numbers are no longer mistaken for YouTube IDs).
+
 ## 0.1.0
 - New Download tab: single-line link box (clears after pasting), format block, clips, file names, Options window and Send to queue.
 - Several clips per video (frame-accurate Premiere timecode); the video is downloaded once and cut as many times as needed.
