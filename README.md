@@ -4,7 +4,7 @@
 
 **videoprep** es un programa gratuito para Windows que prepara videos para editar: los baja con [yt-dlp](https://github.com/yt-dlp/yt-dlp), recorta clips con timecode exacto y los deja en **MP4 con H.264 + AAC**, listos para **Adobe Premiere Pro**.
 
-> Estado: versión temprana (0.0.x). Puede tener errores; si encontrás alguno, abrí un [issue](https://github.com/nicolasrabe/videoprep/issues/new/choose).
+> Estado: versión temprana (0.1.x). Puede tener errores; si encontrás alguno, abrí un [issue](https://github.com/nicolasrabe/videoprep/issues/new/choose).
 
 ## Qué hace
 
