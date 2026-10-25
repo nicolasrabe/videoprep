@@ -48,7 +48,8 @@ Abrí la pestaña **Log**, apretá **Test setup** y después **Copy log**. Si ab
 
 videoprep es y va a seguir siendo gratis. Si te sirve y querés ayudar a mantenerlo, podés hacer una donación:
 
-- *(completar con tus links: GitHub Sponsors, Ko-fi, Cafecito, etc.)*
+* https://www.paypal.com/donate/?hosted_button_id=FFYRACETDE6XQ
+* link.mercadopago.com.ar/rabe5bk
 
 ## Aviso legal
 
@@ -56,4 +57,4 @@ Esta herramienta es para descargar contenido **propio, con licencia o con permis
 
 ## Licencia y créditos
 
-[MIT](LICENSE). Usa, sin incluirlos en este repositorio: [yt-dlp](https://github.com/yt-dlp/yt-dlp), [FFmpeg](https://ffmpeg.org/) (builds de [yt-dlp/FFmpeg-Builds](https://github.com/yt-dlp/FFmpeg-Builds)) y [Deno](https://deno.com/), cada uno con su propia licencia.
+[MIT](LICENSE). videoprep usa, sin incluirlos en este repositorio: [yt-dlp](https://github.com/yt-dlp/yt-dlp), [FFmpeg](https://ffmpeg.org/) (builds de [yt-dlp/FFmpeg-Builds](https://github.com/yt-dlp/FFmpeg-Builds)) y [Deno](https://deno.com/), cada uno con su propia licencia.
